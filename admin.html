@@ -315,7 +315,7 @@
                 <table id="table-codes"></table>
             </div>
 
-            <h3 class="mt-30">أكواد اشتراكات الطلاب (مشتريات الكورسات والكتب)</h3>
+            <h3 class="mt-30">المحتوى المحفوظ في بروفايلات الطلاب (كورساتي وكتبي)</h3>
             <div style="overflow-x:auto;">
                 <table id="table-sub-codes"></table>
             </div>
@@ -369,10 +369,7 @@
                     <label>عنوان المحتوى</label>
                     <input type="text" id="ct-title" required>
                 </div>
-                <div class="form-group" id="course-code-container">
-                    <label>كود التفعيل (كلمة المرور) - لغلق المحتوى (إن وجد)</label>
-                    <input type="text" id="ct-course-code">
-                </div>
+
 
                 <div class="form-group">
                     <label>المرحلة</label>
@@ -407,10 +404,7 @@
                     <label>ملف اللعبة / التطبيق (HTML - الرفع المباشر)</label>
                     <input type="file" id="ct-html" accept=".html,.zip">
                 </div>
-                <div class="form-group">
-                    <label>السعر الأساسي (ج.م)</label>
-                    <input type="number" id="ct-price" required>
-                </div>
+
                 <button type="submit" class="btn-primary w-100" id="btn-save-content">حفظ المحتوى</button>
             </form>
 
@@ -745,14 +739,7 @@
                     <label>عنوان المحتوى</label>
                     <input type="text" id="edit-title" required>
                 </div>
-                <div class="form-group">
-                    <label>كود التفعيل (كلمة المرور)</label>
-                    <input type="text" id="edit-course-code">
-                </div>
-                <div class="form-group">
-                    <label>السعر الأساسي (ج.م)</label>
-                    <input type="number" id="edit-price" required>
-                </div>
+
                 <div class="form-group">
                     <label>تغيير الغلاف/الصورة (اتركه فارغاً لعدم التغيير للمذكرة أو الكورس)</label>
                     <input type="file" id="edit-image" accept="image/*">
@@ -865,7 +852,7 @@
 
             const tSubCodes = document.getElementById('table-sub-codes');
             if (tSubCodes) {
-                let ths = `<th>الكود</th><th>النوع</th><th>العنوان</th><th>التاريخ</th>`;
+                let ths = `<th>كود الطالب</th><th>النوع</th><th>العنوان</th><th>التاريخ</th>`;
                 if (adminType === 'full') ths += `<th>حذف</th>`;
                 tSubCodes.innerHTML = `<tr>${ths}</tr>` + subCodes.map(c => {
                     let tr = `<td>${c.code}</td><td>${c.type === 'course' ? 'كورس' : 'كتاب'}</td><td>${c.title}</td><td>${c.date || ''}</td>`;
@@ -920,10 +907,10 @@
 
             const tContent = document.getElementById('table-content-manager');
             if (tContent) {
-                tContent.innerHTML = `<tr><th>النوع</th><th>العنوان</th><th>السعر</th><th>إجراءات</th></tr>` + contentList.map(c => `<tr>
+                tContent.innerHTML = `<tr><th>النوع</th><th>العنوان</th><th>الحالة</th><th>إجراءات</th></tr>` + contentList.map(c => `<tr>
                     <td>${c.type === 'course' ? 'كورس' : (c.type === 'game' ? 'لعبة HTML' : 'مذكرة/كتاب')}</td>
                     <td>${c.title}</td>
-                    <td>${c.priceBase || 0}</td>
+                    <td><span style="color:#2e7d32; font-weight:bold;"><i class="fas fa-check-circle"></i> مجاني 100%</span></td>
                     <td>
                         <button onclick="window.editContent('${c.fsId ? c.fsId : c.id}')" style="background:#ff9800; color:#fff; border:none; padding:5px 10px; border-radius:5px; margin-bottom:5px; cursor:pointer; display:block; width:100%;"><i class="fas fa-edit"></i> تعديل</button>
                         <button onclick="window.deleteContent('${c.fsId ? c.fsId : c.id}')" style="background:#f44336; color:#fff; border:none; padding:5px 10px; border-radius:5px; cursor:pointer; width:100%;"><i class="fas fa-trash"></i> حذف</button>
@@ -1228,8 +1215,6 @@
             document.getElementById('edit-fsid').value = content.fsId || '';
             document.getElementById('edit-type').value = content.type === 'course' ? 'كورس' : (content.type === 'game' ? 'لعبة' : 'كتاب/مذكرة');
             document.getElementById('edit-title').value = content.title || '';
-            document.getElementById('edit-course-code').value = content.courseCode || '';
-            document.getElementById('edit-price').value = content.priceBase || 0;
 
             document.getElementById('edit-content-modal').style.display = 'flex';
         };
@@ -1242,11 +1227,9 @@
             let id = document.getElementById('edit-id').value;
             let fsId = document.getElementById('edit-fsid').value;
             let title = document.getElementById('edit-title').value;
-            let courseCode = document.getElementById('edit-course-code').value;
-            let priceBase = parseInt(document.getElementById('edit-price').value) || 0;
             let fileInput = document.getElementById('edit-image');
 
-            let updates = { title, courseCode, priceBase };
+            let updates = { title, courseCode: '', priceBase: 0 };
 
             try {
                 if (fileInput.files && fileInput.files[0]) {
@@ -1305,8 +1288,6 @@
                 let titleEl = document.getElementById('ct-title');
                 let gradeEl = document.getElementById('ct-grade');
                 let countryEl = document.getElementById('ct-country');
-                let priceEl = document.getElementById('ct-price');
-                let codeEl = document.getElementById('ct-course-code');
 
                 let newItem = {
                     id: Date.now(),
@@ -1314,8 +1295,8 @@
                     title: titleEl ? titleEl.value : '',
                     grade: gradeEl ? gradeEl.value : '',
                     country: countryEl ? countryEl.value : 'EG',
-                    priceBase: (priceEl ? parseInt(priceEl.value) : 0) || 0,
-                    courseCode: codeEl ? codeEl.value : ''
+                    priceBase: 0,
+                    courseCode: ''
                 };
 
                 let imgInput = document.getElementById('ct-image');

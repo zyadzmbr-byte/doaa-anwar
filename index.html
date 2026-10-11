@@ -228,12 +228,6 @@
                 font-size: 18px !important;
                 font-weight: 900 !important;
             }
-
-            .cart-icon {
-                width: 50px !important;
-                height: 50px !important;
-                font-size: 22px !important;
-            }
         }
 
 
@@ -280,11 +274,7 @@
             }
         };
 
-        function openCart(e) {
-            if (e) e.preventDefault();
-            const modal = document.getElementById('cart-modal');
-            if (modal) modal.style.display = 'flex';
-        }
+
         window.openCountryModal = window.openCountryModal || function (e) {
             if (e) e.preventDefault();
             const m = document.getElementById('country-modal');
@@ -327,12 +317,7 @@
                     </div>
                 </div>
 
-                <!-- Country -->
-                <!-- Cart -->
-                <a href="#" class="nav-icon-circle cart-icon" onclick="openCart(event)"
-                    style="width:45px; height:45px; background:#f4f7fa; color:#12b8c5; font-size:20px; box-shadow:0 4px 10px rgba(0,0,0,0.05); text-decoration:none; display:flex; justify-content:center; align-items:center;">
-                    <i class="fas fa-shopping-cart"></i>
-                </a>
+
 
                 <!-- Login -->
                 <a href="login.html" class="btn-login"

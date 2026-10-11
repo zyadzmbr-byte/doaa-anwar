@@ -69,6 +69,10 @@
                 <li class="active"><a href="#" onclick="showDashTab('dash-home', this)"
                         style="border-radius:10px; margin-bottom:5px;"><i class="fas fa-home"></i>
                         <span>الرئيسية</span></a></li>
+                <li><a href="#" onclick="showDashTab('dash-my-content', this)" id="sidebar-my-content-btn"
+                        style="border-radius:10px; margin-bottom:5px; background:linear-gradient(135deg, rgba(255,152,0,0.12), rgba(18,184,197,0.08)); border:1px solid rgba(255,152,0,0.3);"><i
+                            class="fas fa-book-reader" style="color:#ff9800;"></i> <span
+                            style="font-weight:800; color:#121e33;">كورساتي وكتبي</span></a></li>
                 <li><a href="#" onclick="showDashTab('dash-required', this)"
                         style="border-radius:10px; margin-bottom:5px;"><i class="fas fa-list-ul"></i> <span>المطلوب
                             (مهامك)</span></a></li>
@@ -167,6 +171,56 @@
                             <div id="student-evals">
                                 <!-- Populated dynamically via Admin -->
                             </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- My Courses & Books Tab -->
+                <div id="dash-my-content" class="dash-tab-section" style="display:none;">
+                    <div style="background:linear-gradient(135deg, #1e3c72 0%, #12b8c5 100%); padding:25px 30px; border-radius:20px; color:#fff; margin-bottom:30px; display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:15px; box-shadow:0 12px 30px rgba(18,184,197,0.25);">
+                        <div>
+                            <h2 style="font-size:26px; font-weight:900; margin-bottom:8px; display:flex; align-items:center; gap:10px;"><i class="fas fa-book-reader" style="color:#ffc107;"></i> كورساتي وكتبي المحفوظة</h2>
+                            <p style="margin:0; opacity:0.95; font-size:15px; font-weight:500;">جميع الكورسات والفيديوهات والكتب التي قمت بحفظها في حسابك، متاحة لك للمشاهدة والدراسة في أي وقت دون أي قيود أو أكواد.</p>
+                        </div>
+                        <a href="explore.html" class="btn-primary" style="background:#fff; color:#1e3c72; font-weight:800; border-radius:14px; padding:12px 22px; text-decoration:none; display:flex; align-items:center; gap:8px; box-shadow:0 4px 15px rgba(0,0,0,0.1);"><i class="fas fa-plus-circle" style="color:#12b8c5;"></i> تصفح وإضافة المزيد</a>
+                    </div>
+
+                    <!-- Courses Section -->
+                    <div style="margin-bottom:45px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:2px solid #eef1f5; padding-bottom:10px;">
+                            <h3 class="section-title" style="margin:0; font-size:22px; color:#1e3c72; display:flex; align-items:center; gap:10px;">
+                                <i class="fab fa-youtube" style="color:#f44336; font-size:26px;"></i> الكورسات والفيديوهات التفاعلية
+                            </h3>
+                            <span id="dash-courses-count" style="background:#e8fbff; color:var(--primary-color); font-weight:bold; padding:4px 12px; border-radius:15px; font-size:13px;">0 كورس</span>
+                        </div>
+                        <div class="courses-grid" id="dash-student-courses-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:25px;">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Books Section -->
+                    <div style="margin-bottom:45px;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:2px solid #eef1f5; padding-bottom:10px;">
+                            <h3 class="section-title" style="margin:0; font-size:22px; color:#1e3c72; display:flex; align-items:center; gap:10px;">
+                                <i class="fas fa-book-open" style="color:#4caf50; font-size:24px;"></i> المذكرات والكتب المطبوعة
+                            </h3>
+                            <span id="dash-books-count" style="background:#e8f5e9; color:#2e7d32; font-weight:bold; padding:4px 12px; border-radius:15px; font-size:13px;">0 كتاب</span>
+                        </div>
+                        <div class="books-grid" id="dash-student-books-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:25px;">
+                            <!-- Injected by JS -->
+                        </div>
+                    </div>
+
+                    <!-- Games Section -->
+                    <div style="margin-bottom:45px;" id="dash-games-wrapper">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px; border-bottom:2px solid #eef1f5; padding-bottom:10px;">
+                            <h3 class="section-title" style="margin:0; font-size:22px; color:#1e3c72; display:flex; align-items:center; gap:10px;">
+                                <i class="fas fa-gamepad" style="color:#9c27b0; font-size:24px;"></i> الألعاب والاختبارات التفاعلية (HTML)
+                            </h3>
+                            <span id="dash-games-count" style="background:#f3e5f5; color:#7b1fa2; font-weight:bold; padding:4px 12px; border-radius:15px; font-size:13px;">0 لعبة</span>
+                        </div>
+                        <div class="courses-grid" id="dash-student-games-grid" style="display:grid; grid-template-columns:repeat(auto-fill, minmax(280px, 1fr)); gap:25px;">
+                            <!-- Injected by JS -->
                         </div>
                     </div>
                 </div>

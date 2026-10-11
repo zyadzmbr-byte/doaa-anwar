@@ -67,15 +67,15 @@
                     </div>
                 </a>
                 <h2 style="margin-top:15px;">أهلاً بك في منصتنا!</h2>
-                <p>سجل دخولك باستخدام كود الاشتراك</p>
+                <p>سجل دخولك باستخدام كود الطالب (كود تسجيل الدخول)</p>
             </div>
 
             <form class="login-form" onsubmit="handleLogin(event)">
                 <div class="form-group" style="text-align:right">
-                    <label style="text-align:right; display:block;">كود الاشتراك</label>
+                    <label style="text-align:right; display:block;">كود الطالب</label>
                     <div class="input-icon">
                         <i class="fas fa-key"></i>
-                        <input type="text" id="code-input" placeholder="أدخل الكود الخاص بك (مثال SPD-...)" required
+                        <input type="text" id="code-input" placeholder="أدخل كود الطالب الخاص بك" required
                             autocomplete="off">
                     </div>
                 </div>
@@ -84,7 +84,7 @@
             </form>
 
             <div class="login-footer">
-                <p>ليس لديك كود اشتراك؟</p>
+                <p>ليس لديك كود طالب؟</p>
                 <button type="button" class="btn-primary w-100"
                     style="background:#25D366; border:none; margin-top:10px;" onclick="requestCode()">
                     <i class="fab fa-whatsapp"></i> طلب كود جديد

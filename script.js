@@ -105,18 +105,24 @@ window.forceFakeData = function () {
     if (needUpdateUsers) localStorage.setItem('spedia_users', JSON.stringify(users));
 
     let content = JSON.parse(localStorage.getItem('spedia_content') || '[]');
+    // Clean all prices and codes from content
+    content = content.map(c => {
+        delete c.priceBase;
+        delete c.courseCode;
+        return c;
+    });
     let fakeBooksAndCourses = [
-        { id: 101, type: 'book', grade: '10', title: 'كتاب الرياضيات - متقدم', priceBase: 120, image: 'https://cdni.iconscout.com/illustration/premium/thumb/book-4113220-3406254.png' },
-        { id: 102, type: 'course', grade: '10', title: 'الكيمياء الشامل الممتع', priceBase: 500, image: 'https://cdni.iconscout.com/illustration/premium/thumb/online-learning-3462295-2895977.png' },
-        { id: 103, type: 'book', grade: '11', title: 'مذكرة الفيزياء الذهبية', priceBase: 150, image: 'https://cdni.iconscout.com/illustration/premium/thumb/book-4113220-3406254.png' },
-        { id: 104, type: 'course', grade: '11', title: 'دورة القدرات كمي ولفظي', priceBase: 800, image: 'https://cdni.iconscout.com/illustration/premium/thumb/online-education-3414902-2868846.png' },
-        { id: 105, type: 'course', grade: '12', title: 'المراجعة النهائية', priceBase: 650, image: 'https://cdni.iconscout.com/illustration/premium/thumb/online-learning-3462291-2895973.png' },
-        { id: 106, type: 'book', grade: '1', title: 'تأسيس القراءة والكتابة', priceBase: 90, image: 'https://cdni.iconscout.com/illustration/premium/thumb/book-4113220-3406254.png' },
-        { id: 107, type: 'course', grade: '7', title: 'العلوم العامة المكثفة', priceBase: 300, image: 'https://cdni.iconscout.com/illustration/premium/thumb/online-education-3414902-2868846.png' }
+        { id: 101, type: 'book', grade: '10', title: 'كتاب الرياضيات - متقدم', image: 'https://cdni.iconscout.com/illustration/premium/thumb/book-4113220-3406254.png' },
+        { id: 102, type: 'course', grade: '10', title: 'الكيمياء الشامل الممتع', image: 'https://cdni.iconscout.com/illustration/premium/thumb/online-learning-3462295-2895977.png' },
+        { id: 103, type: 'book', grade: '11', title: 'مذكرة الفيزياء الذهبية', image: 'https://cdni.iconscout.com/illustration/premium/thumb/book-4113220-3406254.png' },
+        { id: 104, type: 'course', grade: '11', title: 'دورة القدرات كمي ولفظي', image: 'https://cdni.iconscout.com/illustration/premium/thumb/online-education-3414902-2868846.png' },
+        { id: 105, type: 'course', grade: '12', title: 'المراجعة النهائية', image: 'https://cdni.iconscout.com/illustration/premium/thumb/online-learning-3462291-2895973.png' },
+        { id: 106, type: 'book', grade: '1', title: 'تأسيس القراءة والكتابة', image: 'https://cdni.iconscout.com/illustration/premium/thumb/book-4113220-3406254.png' },
+        { id: 107, type: 'course', grade: '7', title: 'العلوم العامة المكثفة', image: 'https://cdni.iconscout.com/illustration/premium/thumb/online-education-3414902-2868846.png' }
     ];
     let needUpdateContent = false;
     fakeBooksAndCourses.forEach(fc => { if (!content.find(c => c.id === fc.id)) { content.push(fc); needUpdateContent = true; } });
-    if (needUpdateContent) localStorage.setItem('spedia_content', JSON.stringify(content));
+    localStorage.setItem('spedia_content', JSON.stringify(content));
 
     let exams = JSON.parse(localStorage.getItem('spedia_exams') || '[]');
     if (exams.length > 0 && !exams[0].questionsList) exams = [];
@@ -210,42 +216,7 @@ window.injectBookTransition = function () {
 };
 
 window.injectCartModal = function () {
-    if (!document.getElementById('cart-modal')) {
-        let modal = document.createElement('div');
-        modal.id = 'cart-modal';
-        modal.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.6); z-index:100000; justify-content:center; align-items:center; backdrop-filter:blur(5px);';
-        modal.innerHTML = `
-            <div style="background:#fff; border-radius:20px; padding:30px; width:90%; max-width:500px; box-shadow:0 20px 50px rgba(0,0,0,0.2);">
-                <h3 style="font-size:24px; color:var(--primary-color); margin-bottom:20px; text-align:center;"><i class="fas fa-shopping-cart"></i> سلة المشتريات</h3>
-                <ul id="cart-items-list" style="list-style:none; padding:0; margin-bottom:20px; font-weight:bold; color:#121e33;"></ul>
-                <form id="cart-form" onsubmit="window.submitCartOrder(event)">
-                    <div style="margin-bottom:15px;">
-                        <input id="cart-name" type="text" placeholder="الاسم كامل" required style="width:100%; padding:10px; border:1px solid #ccc; border-radius:10px;">
-                    </div>
-                    <div style="margin-bottom:15px;">
-                        <input id="cart-code" type="text" placeholder="الكود (إن وجد)" style="width:100%; padding:10px; border:1px solid #ccc; border-radius:10px;">
-                    </div>
-
-                    <div style="margin-bottom:15px;">
-                        <select id="cart-payment" required style="width:100%; padding:10px; border:1px solid #ccc; border-radius:10px;">
-                            <option value="">طريقة الدفع</option>
-                            <option value="تحويل بنكي">تحويل بنكي</option>
-                            <option value="دفع إلكتروني">دفع إلكتروني</option>
-                            <option value="نقدي">نقدي (عند التوصيل)</option>
-                        </select>
-                    </div>
-                    <div style="margin-bottom:15px;">
-                        <input id="cart-phone" type="text" placeholder="رقم الهاتف للتواصل (واتساب)" required style="width:100%; padding:10px; border:1px solid #ccc; border-radius:10px;">
-                    </div>
-                    <div style="display:flex; gap:10px;">
-                        <button type="button" class="btn-primary" style="flex:1; background:#f44336;" onclick="document.getElementById('cart-modal').style.display='none'">إلغاء</button>
-                        <button type="submit" class="btn-primary" style="flex:1;">تأكيد وتواصل واتساب</button>
-                    </div>
-                </form>
-            </div>
-        `;
-        document.body.appendChild(modal);
-    }
+    // Shopping cart removed per user requirements
 };
 
 window.renderMegaMenu = function () {
@@ -373,52 +344,18 @@ window.renderCurrentPage = async function () {
         const bookCont = document.getElementById('books-list') || document.getElementById('books-grid');
         const gameCont = document.getElementById('games-grid');
 
-        if (bookCont) window.renderCards(bookCont.id, books, "أريد طلب الكتاب", window.getDialect('req', cCode) || "الطلب الآن");
-        if (courseCont) window.renderCards(courseCont.id, courses, "أريد الاشتراك في", window.getDialect('req', cCode) || "الاشتراك الآن");
-        if (gameCont) window.renderCards(gameCont.id, games, "أريد اللعب/التطبيق", "تشغيل/دخول اللعبة");
+        if (bookCont) window.renderCards(bookCont.id, books, "", "فتح وحفظ المحتوى");
+        if (courseCont) window.renderCards(courseCont.id, courses, "", "فتح وحفظ المحتوى");
+        if (gameCont) window.renderCards(gameCont.id, games, "", "فتح وحفظ المحتوى");
     }
     else if (path.includes('my-subscriptions.html')) {
-        let code = localStorage.getItem('spedia_my_sub_code');
-        if (!code) {
-            alert('يرجى الدخول بكود اشتراكك (من خلال رز الكورسات بالأعلى).');
-            window.location.href = 'index.html';
-            return;
-        }
-
-        let content = JSON.parse(localStorage.getItem('spedia_content') || '[]');
-        if (window.fsData) {
-            try {
-                let fsContent = await window.fsData.getAllContent();
-                content = [...content, ...fsContent];
-            } catch (e) { console.warn(e); }
-        }
-
-        let subCodesList = [];
-        if (window.fsData && window.fsData.getSubscriptionsByCode) {
-            try {
-                subCodesList = await window.fsData.getSubscriptionsByCode(code);
-            } catch (e) { console.warn(e); }
+        let user = JSON.parse(localStorage.getItem('spedia_currentUser') || 'null');
+        if (user) {
+            window.location.href = "dashboard.html#dash-my-content";
         } else {
-            let subs = JSON.parse(localStorage.getItem('spedia_sub_codes') || '[]');
-            subCodesList = subs.filter(s => s.code === code);
+            window.location.href = "login.html";
         }
-
-        let subscribedTitles = subCodesList.map(s => s.title);
-        let unlockedLocal = JSON.parse(localStorage.getItem('spedia_unlocked') || '[]');
-        let allowedTitles = [...new Set([...subscribedTitles, ...unlockedLocal])];
-        let filteredContent = content.filter(c => allowedTitles.includes(c.title));
-
-        let books = filteredContent.filter(c => c.type == 'book');
-        let courses = filteredContent.filter(c => c.type == 'course');
-        let games = filteredContent.filter(c => c.type == 'game');
-
-        const courseCont = document.getElementById('courses-grid');
-        const bookCont = document.getElementById('books-grid');
-        const gameCont = document.getElementById('games-grid');
-
-        if (bookCont) window.renderCards(bookCont.id, books, "", "إدخال كود القفل السري", true);
-        if (courseCont) window.renderCards(courseCont.id, courses, "", "إدخال كود القفل السري", true);
-        if (gameCont) window.renderCards(gameCont.id, games, "", "إدخال كود القفل السري", true);
+        return;
     }
     else if (path.includes('dashboard.html')) {
         let user = JSON.parse(localStorage.getItem('spedia_currentUser'));
@@ -431,6 +368,15 @@ window.renderCurrentPage = async function () {
         if (elGrade) elGrade.innerText = `طالب مسجل كود: ${user.code}`;
 
         await window.loadStudentData(user);
+
+        // Check if hash points to a tab (such as #dash-my-content)
+        if (window.location.hash) {
+            let tabId = window.location.hash.substring(1);
+            if (document.getElementById(tabId)) {
+                let link = document.querySelector(`.sidebar-menu a[onclick*="${tabId}"]`);
+                window.showDashTab(tabId, link);
+            }
+        }
     }
     else if (path.includes('admin.html')) {
         if (sessionStorage.getItem('isAdmin') !== 'yes') {
@@ -459,52 +405,38 @@ window.renderCards = function (containerId, items, whatsappPrefix, btnText, isMy
         let div = document.createElement('div');
         div.className = 'subject-card animate-on-scroll';
 
-        let btnHtml = '';
-        let unlocked = JSON.parse(localStorage.getItem('spedia_unlocked') || '[]');
-        let isUnlocked = unlocked.includes(item.title);
+        let safeTitle = (item.title || '').replace(/'/g, "\\'");
+        let safeId = item.fsId || item.id || '';
+        let itemType = item.type || 'course';
 
-        if (isUnlocked) {
-            if (item.type === 'course') {
-                let ytLink = item.videoUrl ? item.videoUrl : (item.youtubeId ? `https://www.youtube.com/watch?v=${item.youtubeId}` : '#');
-                btnHtml = `<button onclick="window.open('${ytLink}', '_blank')" class="btn-primary w-100" style="width:100%; padding:15px; border-radius:12px; font-size:18px; background:linear-gradient(135deg, #4caf50, #2e7d32);"><i class="fas fa-play-circle" style="font-size:24px;"></i> شاهد الفيديو الآن </button>`;
-            } else if (item.type === 'game') {
-                let htmlLink = item.htmlUrl || '#';
-                btnHtml = `<a href="${htmlLink}" target="_blank" class="btn-primary w-100" style="display:block; text-align:center; box-sizing:border-box; width:100%; padding:15px; border-radius:12px; font-size:18px; background:linear-gradient(135deg, #9c27b0, #6a1b9a); text-decoration:none;"><i class="fas fa-gamepad" style="font-size:24px;"></i> تشغيل اللعبة/التطبيق </a>`;
-            } else {
-                let pdfLink = item.pdfUrl || '#';
-                btnHtml = `<a href="${pdfLink}" target="_blank" class="btn-primary w-100" style="display:block; text-align:center; box-sizing:border-box; width:100%; padding:15px; border-radius:12px; font-size:18px; background:linear-gradient(135deg, #4caf50, #2e7d32); text-decoration:none;"><i class="fas fa-book-open" style="font-size:24px;"></i> تصفح الكتاب </a>`;
-            }
-        } else {
-            if (isMySubscriptions) {
-                btnHtml = `<div style="display:flex; flex-direction:column; gap:10px; width:100%;">
-                    <button onclick="window.unlockCourse('${item.title}', '${item.courseCode || ''}')" class="btn-primary w-100" style="width:100%; padding:15px; border-radius:12px; font-size:16px; background:linear-gradient(135deg, #f44336, #e53935);"><i class="fas fa-lock"></i> إدخال كود القفل من الإدارة</button>
-                    <a href="#" onclick="window.sendWhatsApp('أريد طلب كود فتح المحتوى لـ: ${item.title}'); return false;" style="display:block; text-align:center; color:#f44336; font-size:15px; font-weight:800; text-decoration:underline;">طلب كود فتح المحتوى</a>
-                </div>`;
-            } else {
-                let cartAction = `window.initiatePurchase('${item.title}', '${window.renderPrice(item.priceBase)}', '${item.type === 'course' ? 'كورس' : (item.type === 'game' ? 'لعبة' : 'كتاب')}')`;
-                let unlockBtn = item.courseCode ? `<button onclick="window.unlockCourse('${item.title}', '${item.courseCode}')" class="btn-primary" style="flex:1; padding:15px; border-radius:12px; font-size:16px; background:linear-gradient(135deg, #FF9800, #F57C00);"><i class="fas fa-key"></i> لدي كود</button>` : '';
-                btnHtml = `<div style="display:flex; gap:5px; width:100%;">
-                    <button onclick="${cartAction}" class="btn-primary w-100" style="flex:2; padding:15px; border-radius:12px; font-size:16px;"><i class="fas fa-shopping-cart"></i> ${btnText}</button>
-                    ${unlockBtn}
-                </div>`;
-            }
-        }
+        // Single button: "فتح وحفظ المحتوى" under each video and book
+        let btnHtml = `
+            <button onclick="window.handleOpenAndSaveContent('${safeId}', '${safeTitle}', '${itemType}')" 
+                    class="btn-primary w-100 btn-save-open" 
+                    style="width:100%; padding:14px 18px; border-radius:14px; font-size:16px; font-weight:800; background:linear-gradient(135deg, #12b8c5, #1e3c72); display:flex; align-items:center; justify-content:center; gap:8px; box-shadow:0 8px 20px rgba(18,184,197,0.25); border:none; cursor:pointer; transition:0.3s;">
+                <i class="fas fa-folder-plus"></i> فتح وحفظ المحتوى
+            </button>
+        `;
 
         let imgStyle = item.type === 'course'
             ? 'object-fit:cover; width:100%; height:100%; position:absolute; top:0; left:0;'
             : 'object-fit:contain; height:80%; position:absolute; top:10%; left:0; right:0; margin:auto; filter:drop-shadow(0 15px 15px rgba(0,0,0,0.15));';
         let ytOverlay = item.type === 'course'
-            ? '<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.4); display:flex; justify-content:center; align-items:center; pointer-events:none;"><i class="fab fa-youtube" style="color:red; font-size:60px; filter:drop-shadow(0 5px 10px rgba(0,0,0,0.5));"></i></div>'
+            ? '<div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.35); display:flex; justify-content:center; align-items:center; pointer-events:none;"><i class="fab fa-youtube" style="color:red; font-size:60px; filter:drop-shadow(0 5px 10px rgba(0,0,0,0.5));"></i></div>'
             : '';
 
         div.innerHTML = `
             <div class="subject-cover" style="background:linear-gradient(135deg, #e8fbff, #f4f7fa); height:180px; position:relative; overflow:hidden;">
-                <img src="${item.image}" style="${imgStyle} transition:0.3s;" class="hover-scale">
+                <img src="${item.image || 'https://cdni.iconscout.com/illustration/premium/thumb/online-learning-3462295-2895977.png'}" style="${imgStyle} transition:0.3s;" class="hover-scale">
                 ${ytOverlay}
             </div>
             <div class="subject-body" style="text-align:center; padding:25px;">
-                <h3 style="font-size:20px; font-weight:800; color:var(--text-dark); margin-bottom:10px;">${item.title}</h3>
-                <h4 class="highlight mt-10" style="font-size:26px; font-weight:900; margin-bottom:20px;">${window.renderPrice(item.priceBase)}</h4>
+                <h3 style="font-size:20px; font-weight:800; color:var(--text-dark); margin-bottom:12px;">${item.title}</h3>
+                <div style="margin-bottom:18px;">
+                    <span style="background:linear-gradient(135deg, #e8f5e9, #c8e6c9); color:#2e7d32; font-size:14px; font-weight:800; padding:6px 16px; border-radius:20px; display:inline-flex; align-items:center; gap:6px;">
+                        <i class="fas fa-check-circle"></i> مجاني بالكامل
+                    </span>
+                </div>
                 ${btnHtml}
             </div>
         `;
@@ -512,103 +444,200 @@ window.renderCards = function (containerId, items, whatsappPrefix, btnText, isMy
     });
 };
 
+window.handleOpenAndSaveContent = async function (id, title, type) {
+    // 1. Get content item
+    let content = JSON.parse(localStorage.getItem('spedia_content') || '[]');
+    if (window.fsData && window.fsData.getAllContent) {
+        try {
+            let fsC = await window.fsData.getAllContent();
+            content = [...content, ...fsC];
+        } catch (e) { }
+    }
+    let targetItem = content.find(c => (c.fsId == id || c.id == id || c.title === title)) || { id, title, type };
+
+    let currentUser = JSON.parse(localStorage.getItem('spedia_currentUser') || 'null');
+    let defaultCode = currentUser ? currentUser.code : '';
+
+    let modal = document.getElementById('save-content-code-modal');
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.id = 'save-content-code-modal';
+        modal.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:100005; justify-content:center; align-items:center; backdrop-filter:blur(6px);';
+        document.body.appendChild(modal);
+    }
+
+    modal.innerHTML = `
+        <div style="background:#fff; border-radius:24px; padding:35px 28px; width:90%; max-width:480px; text-align:center; box-shadow:0 25px 60px rgba(0,0,0,0.3); position:relative;">
+            <div style="width:70px; height:70px; border-radius:50%; background:linear-gradient(135deg, #e8fbff, #d1f7fa); color:var(--primary-color); display:flex; align-items:center; justify-content:center; margin:0 auto 15px auto; font-size:32px;">
+                <i class="fas fa-folder-plus"></i>
+            </div>
+            <h3 style="margin-bottom:10px; color:#1e3c72; font-weight:900; font-size:22px;">فتح وحفظ المحتوى</h3>
+            <p style="margin-bottom:18px; color:#555; font-size:15px; line-height:1.6;">
+                لحفظ <strong>"${title}"</strong> في خانة <strong>(كورساتي وكتبي)</strong> داخل بروفايلك ومشاهدته في أي وقت، يرجى إدخال <strong>كود الطالب (كود تسجيل الدخول)</strong>:
+            </p>
+            <input type="text" id="save-content-code-input" value="${defaultCode}" placeholder="أدخل كود الطالب الخاص بك..." style="width:100%; padding:14px; margin-bottom:18px; font-size:18px; text-align:center; border:2px solid #12b8c5; border-radius:12px; font-weight:bold; box-sizing:border-box; outline:none;">
+            <div style="display:flex; gap:10px;">
+                <button id="btn-do-save-content" class="btn-primary" style="flex:2; padding:14px; border-radius:12px; font-size:16px; font-weight:800; background:linear-gradient(135deg, #12b8c5, #1e3c72); cursor:pointer; border:none; display:flex; align-items:center; justify-content:center; gap:8px;">
+                    <i class="fas fa-check-circle"></i> تأكيد وحفظ في البروفايل
+                </button>
+                <button onclick="document.getElementById('save-content-code-modal').style.display='none'" class="btn-secondary" style="flex:1; padding:14px; border-radius:12px; font-size:15px; font-weight:700; background:#f4f7fa; color:#666; border:none; cursor:pointer;">
+                    إلغاء
+                </button>
+            </div>
+            <p style="margin-top:15px; margin-bottom:0; font-size:13px; color:#888;">
+                ليس لديك حساب؟ <a href="login.html" style="color:var(--primary-color); font-weight:bold; text-decoration:underline;">سجل كود جديد هنا</a>
+            </p>
+        </div>
+    `;
+    modal.style.display = 'flex';
+
+    document.getElementById('btn-do-save-content').onclick = async () => {
+        let codeInput = document.getElementById('save-content-code-input').value.trim();
+        if (!codeInput) {
+            alert('الرجاء إدخال كود الطالب الخاص بك');
+            return;
+        }
+
+        let btn = document.getElementById('btn-do-save-content');
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري الحفظ...';
+        btn.disabled = true;
+
+        // Verify or create student profile for this code
+        let studentUser = null;
+        let allUsers = [];
+        if (window.fsData && window.fsData.getAllUsers) {
+            try { allUsers = await window.fsData.getAllUsers(); } catch (e) { }
+        }
+        if (!allUsers || !allUsers.length) {
+            allUsers = JSON.parse(localStorage.getItem('spedia_users') || '[]');
+        }
+        studentUser = allUsers.find(u => u.code.toLowerCase() === codeInput.toLowerCase() || u.code === codeInput);
+
+        if (!studentUser) {
+            let allCodes = [];
+            if (window.fsData && window.fsData.getAllCodes) {
+                try { allCodes = await window.fsData.getAllCodes(); } catch (e) { }
+            }
+            if (!allCodes || !allCodes.length) {
+                allCodes = JSON.parse(localStorage.getItem('spedia_codes') || '[]');
+            }
+            let codeObj = allCodes.find(c => c.code === codeInput);
+
+            studentUser = {
+                code: codeInput,
+                name: (codeObj && codeObj.studentName) ? codeObj.studentName : ('طالب ' + codeInput),
+                grade: targetItem.grade || '10',
+                role: 'student',
+                id: Date.now()
+            };
+
+            if (window.fsData && window.fsData.addUser) {
+                try { await window.fsData.addUser(studentUser); } catch (e) { }
+            }
+            let uList = JSON.parse(localStorage.getItem('spedia_users') || '[]');
+            if (!uList.some(u => u.code === codeInput)) {
+                uList.push(studentUser);
+                localStorage.setItem('spedia_users', JSON.stringify(uList));
+            }
+        }
+
+        // Set as current logged in user
+        localStorage.setItem('spedia_currentUser', JSON.stringify(studentUser));
+
+        // Save content to student's library
+        let subItem = {
+            code: studentUser.code,
+            title: targetItem.title,
+            type: targetItem.type,
+            contentId: targetItem.fsId || targetItem.id,
+            image: targetItem.image || '',
+            videoUrl: targetItem.videoUrl || '',
+            youtubeId: targetItem.youtubeId || '',
+            pdfUrl: targetItem.pdfUrl || '',
+            htmlUrl: targetItem.htmlUrl || '',
+            grade: targetItem.grade || studentUser.grade,
+            date: new Date().toLocaleDateString('ar-EG')
+        };
+
+        if (window.fsData && window.fsData.addSubscriptionCode) {
+            try {
+                await window.fsData.addSubscriptionCode(subItem);
+            } catch (e) { console.warn("Firebase sub save failed:", e); }
+        }
+
+        let subs = JSON.parse(localStorage.getItem('spedia_sub_codes') || '[]');
+        if (!subs.some(s => s.code === studentUser.code && s.title === targetItem.title)) {
+            subs.push(subItem);
+            localStorage.setItem('spedia_sub_codes', JSON.stringify(subs));
+        }
+
+        let mySavedKey = 'spedia_student_saved_' + studentUser.code;
+        let mySaved = JSON.parse(localStorage.getItem(mySavedKey) || '[]');
+        if (!mySaved.some(s => s.title === targetItem.title)) {
+            mySaved.push(targetItem);
+            localStorage.setItem(mySavedKey, JSON.stringify(mySaved));
+        }
+
+        let unlocked = JSON.parse(localStorage.getItem('spedia_unlocked') || '[]');
+        if (!unlocked.includes(targetItem.title)) {
+            unlocked.push(targetItem.title);
+            localStorage.setItem('spedia_unlocked', JSON.stringify(unlocked));
+        }
+
+        let directUrl = '';
+        if (targetItem.type === 'course') {
+            directUrl = targetItem.videoUrl || (targetItem.youtubeId ? `https://www.youtube.com/watch?v=${targetItem.youtubeId}` : '');
+        } else if (targetItem.type === 'game') {
+            directUrl = targetItem.htmlUrl || '';
+        } else {
+            directUrl = targetItem.pdfUrl || '';
+        }
+
+        let directBtnHtml = directUrl ? `
+            <a href="${directUrl}" target="_blank" class="btn-primary" style="padding:14px; border-radius:12px; font-size:16px; font-weight:800; background:linear-gradient(135deg, #4caf50, #2e7d32); text-decoration:none; display:flex; align-items:center; justify-content:center; gap:8px;">
+                <i class="fas fa-play-circle"></i> فتح ومشاهدة المحتوى الآن مباشرة
+            </a>
+        ` : '';
+
+        modal.innerHTML = `
+            <div style="background:#fff; border-radius:24px; padding:35px 28px; width:90%; max-width:500px; text-align:center; box-shadow:0 25px 60px rgba(0,0,0,0.3); animation:popIn 0.3s ease;">
+                <div style="width:75px; height:75px; border-radius:50%; background:#e8f5e9; color:#2e7d32; display:flex; align-items:center; justify-content:center; margin:0 auto 15px auto; font-size:36px;">
+                    <i class="fas fa-check-circle"></i>
+                </div>
+                <h3 style="font-size:22px; font-weight:900; color:#121e33; margin-bottom:10px;">تمت الإضافة إلى بروفايلك بنجاح! 🎉</h3>
+                <p style="font-size:15px; color:#555; margin-bottom:20px; line-height:1.6;">
+                    تم حفظ <strong>"${targetItem.title}"</strong> داخل خانة <strong>(كورساتي وكتبي)</strong> في بروفايلك تحت الكود: <strong style="color:var(--primary-color);">${studentUser.code}</strong>.
+                    يمكنك مشاهدته في أي وقت دون قيود أو مشاكل!
+                </p>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <a href="dashboard.html#dash-my-content" class="btn-primary" style="padding:14px; border-radius:12px; font-size:16px; font-weight:800; background:linear-gradient(135deg, #12b8c5, #1e3c72); text-decoration:none; display:flex; align-items:center; justify-content:center; gap:8px;">
+                        <i class="fas fa-user-graduate"></i> الذهاب إلى بروفايلي ومشاهدة المحتوى
+                    </a>
+                    ${directBtnHtml}
+                    <button onclick="document.getElementById('save-content-code-modal').style.display='none'" class="btn-secondary" style="padding:12px; border-radius:12px; font-size:15px; font-weight:700; background:#f4f7fa; color:#666; border:none; cursor:pointer;">
+                        متابعة التصفح هنا
+                    </button>
+                </div>
+            </div>
+        `;
+    };
+};
+
 window.sendWhatsApp = function (msg) {
     let finalMsg = "أهلاً بك في منصة دعاء انور التعليمية.\n\n" + msg;
     window.open(`${WA_LINK}?text=${encodeURIComponent(finalMsg)}`, '_blank');
 };
 
-function openCart(e) {
-    if (e) e.preventDefault();
-    let cart = JSON.parse(localStorage.getItem('spedia_cart') || '[]');
-    if (cart.length === 0) {
-        alert("سلة المشتريات فارغة. اختر الكورس أو الكتاب أولاً.");
-        return;
-    }
-    document.getElementById('cart-modal').style.display = 'flex';
-    document.getElementById('cart-items-list').innerHTML = cart.map(c => `<li>${c.title} - ${c.price}</li>`).join('');
-}
-window.openCart = openCart;
-
-window.initiatePurchase = function (title, price, typeText) {
-    if (!document.getElementById('sub-code-modal')) {
-        let modal = document.createElement('div');
-        modal.id = 'sub-code-modal';
-        modal.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:100005; justify-content:center; align-items:center; backdrop-filter:blur(5px);';
-        modal.innerHTML = `
-            <div style="background:#fff; border-radius:20px; padding:30px; width:90%; max-width:500px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.2);">
-                <h3 style="margin-bottom:20px; color:#1e3c72;">كود الاشتراك</h3>
-                <p style="margin-bottom:20px; color:#555;">أدخل كودك المكون من 4 أرقام إذا كنت مسجلاً من قبل لإضافة المحتوى إلى حسابك.</p>
-                <input type="text" id="sub-exist-code" placeholder="مثال: 1234" maxlength="4" style="width:100%; padding:15px; margin-bottom:15px; font-size:20px; text-align:center; border:2px solid #ccc; border-radius:10px;">
-                <button id="btn-sub-continue" class="btn-primary w-100" style="margin-bottom:20px;">متابعة الشراء بهذا الكود</button>
-                <hr style="border:none; border-top:1px solid #eee; margin:20px 0;">
-                <p style="margin-bottom:15px; color:#555;font-weight:bold;">مستخدم جديد؟ قم بإنشاء كود مكون من 4 أرقام</p>
-                <button id="btn-sub-generate" class="btn-primary w-100" style="background:linear-gradient(135deg, #FF9800, #F57C00);">توليد كود تلقائي ومتابعة</button>
-                <button onclick="document.getElementById('sub-code-modal').style.display='none'" class="btn-secondary w-100 mt-10" style="background:none; color:#888; border:none; margin-top:15px;">إلغاء</button>
-            </div>
-        `;
-        document.body.appendChild(modal);
-
-        document.getElementById('btn-sub-continue').onclick = () => {
-            let code = document.getElementById('sub-exist-code').value.trim();
-            window.continuePurchaseWithCode(code);
-        };
-        document.getElementById('btn-sub-generate').onclick = () => {
-            let code = Math.floor(1000 + Math.random() * 9000).toString();
-            alert("تم توليد الكود الخاص بك: " + code + "\\nيرجى حفظه للدخول به لاحقاً.");
-            window.continuePurchaseWithCode(code);
-        };
-    }
-    document.getElementById('sub-code-modal').dataset.title = title;
-    document.getElementById('sub-code-modal').dataset.price = price;
-    document.getElementById('sub-code-modal').dataset.type = typeText;
-    document.getElementById('sub-exist-code').value = localStorage.getItem('spedia_my_sub_code') || '';
-    document.getElementById('sub-code-modal').style.display = 'flex';
-};
-
-window.continuePurchaseWithCode = async function (code) {
-    let modal = document.getElementById('sub-code-modal');
-    modal.style.display = 'none';
-    let title = modal.dataset.title;
-    let price = modal.dataset.price;
-    let typeText = modal.dataset.type;
-
-    localStorage.setItem('spedia_my_sub_code', code);
-
-    let subItem = { code: code, title: title, type: typeText === 'كورس' ? 'course' : 'book', date: new Date().toLocaleDateString('ar-EG') };
-
-    let fbSuccess = false;
-    if (window.fsData && window.fsData.addSubscriptionCode) {
-        try {
-            await window.fsData.addSubscriptionCode(subItem);
-            fbSuccess = true;
-        } catch (e) {
-            console.warn("Saving subscription to Firebase failed. Falling back to local storage.", e);
-        }
-    }
-
-    if (!fbSuccess) {
-        let subs = JSON.parse(localStorage.getItem('spedia_sub_codes') || '[]');
-        if (!subs.some(s => s.code === code && s.title === title)) {
-            subs.push(subItem);
-        }
-        localStorage.setItem('spedia_sub_codes', JSON.stringify(subs));
-    }
-
-    window.addToCart(title, price, typeText, code);
-};
-
-window.addToCart = function (title, price, typeText, code = '') {
-    let cart = JSON.parse(localStorage.getItem('spedia_cart') || '[]');
-    cart.push({ title: title, price: price, type: typeText, code: code });
-    localStorage.setItem('spedia_cart', JSON.stringify(cart));
-    alert("تم الإضافة إلى السلة! ومحتوياتك الآن مرتبطة بالكود: " + code);
-    if (window.renderCards) window.location.reload();
-};
+// Cart removed per user request
+window.openCart = function (e) { if (e) e.preventDefault(); };
+window.initiatePurchase = function () { };
+window.continuePurchaseWithCode = function () { };
+window.addToCart = function () { };
 
 window.handleLogin = async function (e) {
     if (e) e.preventDefault();
     let code = document.getElementById('code-input').value.trim().toUpperCase();
-    if (!code) return alert("الرجاء إدخال كود الاشتراك");
+    if (!code) return alert("الرجاء إدخال كود الطالب");
 
     let allUsers = [];
     if (window.fsData && window.fsData.getAllUsers) {
@@ -641,7 +670,7 @@ window.handleLogin = async function (e) {
                 }
             }
         } else {
-            alert("كود الاشتراك غير صحيح أو غير مفعل. يرجى التواصل مع الإدارة.");
+            alert("كود الطالب غير صحيح أو غير مسجل. يرجى التواصل مع الإدارة أو طلب كود جديد.");
         }
         return;
     }
@@ -651,7 +680,7 @@ window.handleLogin = async function (e) {
 };
 
 window.requestCode = function () {
-    let msg = "أريد طلب كود اشتراك جديد لمنصة دعاء انور التعليمية";
+    let msg = "أريد طلب كود طالب جديد لمنصة دعاء انور التعليمية";
     window.open(`${WA_LINK}?text=${encodeURIComponent(msg)}`, '_blank');
 };
 
@@ -708,90 +737,93 @@ window.closeRegisterModal = function () {
 };
 
 window.submitCartOrder = function (e) {
-    e.preventDefault();
-    let cart = JSON.parse(localStorage.getItem('spedia_cart') || '[]');
-    let name = document.getElementById('cart-name').value;
-    let code = document.getElementById('cart-code').value;
-    let payment = document.getElementById('cart-payment').value;
-    let phone = document.getElementById('cart-phone').value;
+    if (e) e.preventDefault();
+};
 
-    let itemsStr = cart.map(c => c.title).join(' , ');
-    let msg = `طلب جديد:\nالاسم: ${name}\nالكود: ${code || 'لا يوجد'}\nطريقة الدفع: ${payment}\nللتواصل: ${phone}\nالمطلوب: ${itemsStr}`;
-
-    localStorage.removeItem('spedia_cart');
-    document.getElementById('cart-modal').style.display = 'none';
-    sendWhatsApp(msg);
-}
-
-window.openMySubscriptions = async function () {
-    if (!document.getElementById('my-subs-login-modal')) {
-        let modal = document.createElement('div');
-        modal.id = 'my-subs-login-modal';
-        modal.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:100005; justify-content:center; align-items:center; backdrop-filter:blur(5px);';
+window.openMySubscriptions = function () {
+    let user = JSON.parse(localStorage.getItem('spedia_currentUser') || 'null');
+    if (user && user.code) {
+        // Logged in: open directly inside student profile without asking for any code
+        window.location.href = 'dashboard.html#dash-my-content';
+    } else {
+        // Not logged in: ask for student login code to access their profile directly
+        let modal = document.getElementById('my-subs-quick-modal');
+        if (!modal) {
+            modal = document.createElement('div');
+            modal.id = 'my-subs-quick-modal';
+            modal.style.cssText = 'display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.7); z-index:100005; justify-content:center; align-items:center; backdrop-filter:blur(6px);';
+            document.body.appendChild(modal);
+        }
         modal.innerHTML = `
-            <div style="background:#fff; border-radius:20px; padding:30px; width:90%; max-width:500px; text-align:center; box-shadow:0 20px 50px rgba(0,0,0,0.2);">
-                <h3 style="margin-bottom:20px; color:#1e3c72;"><i class="fas fa-book-reader"></i> كورساتي وكتبي</h3>
-                <p style="margin-bottom:20px; color:#555;">الرجاء إدخال كود الاشتراك الخاص بك (4 أرقام) للوصول إلى محتوياتك المسجلة.</p>
-                <input type="text" id="my-subs-code-input" placeholder="أدخل الكود... مثال: 1234" maxlength="4" style="width:100%; padding:15px; margin-bottom:15px; font-size:20px; text-align:center; border:2px solid #ccc; border-radius:10px;">
-                <button id="btn-my-subs-login" class="btn-primary w-100" style="margin-bottom:15px; background:linear-gradient(135deg, #12b8c5, #1e3c72);">دخول للمحتوى</button>
-                <a href="#" onclick="window.sendWhatsApp('أهلاً، نسيت كود الاشتراك الخاص بي لمنصة دعاء انور التعليمية، هل يمكنكم مساعدتي؟'); return false;" style="color:#f44336; font-weight:bold; text-decoration:underline;">هل نسيت الكود؟</a>
-                <button onclick="document.getElementById('my-subs-login-modal').style.display='none'" class="btn-secondary w-100" style="background:none; color:#888; border:none; margin-top:20px;">إلغاء</button>
+            <div style="background:#fff; border-radius:24px; padding:32px 28px; width:90%; max-width:460px; text-align:center; box-shadow:0 25px 60px rgba(0,0,0,0.3); animation:popIn 0.3s ease;">
+                <div style="width:70px; height:70px; border-radius:50%; background:linear-gradient(135deg, #fff3e0, #ffe0b2); color:#ff9800; display:flex; align-items:center; justify-content:center; margin:0 auto 15px auto; font-size:32px;">
+                    <i class="fas fa-book-reader"></i>
+                </div>
+                <h3 style="margin-bottom:10px; color:#1e3c72; font-weight:900; font-size:22px;">كورساتي وكتبي</h3>
+                <p style="margin-bottom:20px; color:#555; font-size:15px; line-height:1.6;">
+                    الرجاء إدخال <strong>كود الطالب (كود تسجيل الدخول)</strong> لفتح بروفايلك والوصول إلى جميع كورساتك وكتبك المحفوظة:
+                </p>
+                <input type="text" id="quick-subs-code-input" placeholder="أدخل كود الطالب الخاص بك..." style="width:100%; padding:14px; margin-bottom:18px; font-size:18px; text-align:center; border:2px solid #ff9800; border-radius:12px; font-weight:bold; box-sizing:border-box; outline:none;">
+                <div style="display:flex; gap:10px;">
+                    <button id="btn-quick-subs-login" class="btn-primary" style="flex:2; padding:14px; border-radius:12px; font-size:16px; font-weight:800; background:linear-gradient(135deg, #ff9800, #f57c00); border:none; cursor:pointer;">
+                        <i class="fas fa-sign-in-alt"></i> فتح بروفايلي
+                    </button>
+                    <button onclick="document.getElementById('my-subs-quick-modal').style.display='none'" class="btn-secondary" style="flex:1; padding:14px; border-radius:12px; font-size:15px; font-weight:700; background:#f4f7fa; color:#666; border:none; cursor:pointer;">
+                        إلغاء
+                    </button>
+                </div>
+                <p style="margin-top:15px; margin-bottom:0; font-size:13px; color:#888;">
+                    ليس لديك حساب؟ <a href="login.html" style="color:#ff9800; font-weight:bold; text-decoration:underline;">تسجيل الدخول / طلب كود</a>
+                </p>
             </div>
         `;
-        document.body.appendChild(modal);
+        modal.style.display = 'flex';
 
-        document.getElementById('btn-my-subs-login').onclick = async () => {
-            let code = document.getElementById('my-subs-code-input').value.trim();
-            if (code.length < 4) return alert('الرجاء إدخال كود صحيح من 4 أرقام');
+        document.getElementById('btn-quick-subs-login').onclick = async () => {
+            let code = document.getElementById('quick-subs-code-input').value.trim();
+            if (!code) return alert('الرجاء إدخال كود الطالب');
 
-            let btn = document.getElementById('btn-my-subs-login');
-            btn.innerText = 'جاري التحقق...';
-
-            let subCodes = [];
-            let fbSuccess = false;
-            if (window.fsData && window.fsData.getSubscriptionsByCode) {
-                try {
-                    subCodes = await window.fsData.getSubscriptionsByCode(code);
-                    fbSuccess = true;
-                } catch (e) { console.warn("Firebase fetch failed, fallback to local:", e); }
+            let allUsers = [];
+            if (window.fsData && window.fsData.getAllUsers) {
+                try { allUsers = await window.fsData.getAllUsers(); } catch (e) { }
             }
-            if (!fbSuccess) {
-                let subs = JSON.parse(localStorage.getItem('spedia_sub_codes') || '[]');
-                subCodes = subs.filter(s => s.code === code);
+            if (!allUsers || !allUsers.length) {
+                allUsers = JSON.parse(localStorage.getItem('spedia_users') || '[]');
             }
-
-            btn.innerText = 'دخول للمحتوى';
-
-            if (subCodes.length === 0) {
-                alert("لا يوجد محتوى مرتبط بهذا الكود حالياً.");
-                return;
+            let student = allUsers.find(u => u.code.toLowerCase() === code.toLowerCase() || u.code === code);
+            if (!student) {
+                student = { code: code, name: 'طالب ' + code, grade: '10', role: 'student', id: Date.now() };
+                let uList = JSON.parse(localStorage.getItem('spedia_users') || '[]');
+                uList.push(student);
+                localStorage.setItem('spedia_users', JSON.stringify(uList));
             }
-
-            localStorage.setItem('spedia_my_sub_code', code);
-
-            document.getElementById('my-subs-login-modal').style.display = 'none';
-
-            // Redirect to the dedicated subscripton page
-            window.location.href = "my-subscriptions.html";
+            localStorage.setItem('spedia_currentUser', JSON.stringify(student));
+            window.location.href = 'dashboard.html#dash-my-content';
         };
     }
-    document.getElementById('my-subs-code-input').value = localStorage.getItem('spedia_my_sub_code') || '';
-    document.getElementById('my-subs-login-modal').style.display = 'flex';
 };
 
 window.injectMySubscriptionsBtn = function () {
-    let navActions = document.querySelector('.nav-actions');
-    if (navActions && !document.getElementById('my-subs-btn')) {
-        let btn = document.createElement('a');
-        btn.id = 'my-subs-btn';
-        btn.href = '#';
-        btn.onclick = (e) => { e.preventDefault(); window.openMySubscriptions(); };
-        btn.style.cssText = 'padding:10px 15px; font-size:14px; border-radius:20px; background:#fff; color:#FF9800; border:2px solid #FF9800; font-weight:800; text-decoration:none; display:flex; align-items:center; gap:5px; box-shadow:0 4px 10px rgba(0,0,0,0.05); transition:0.3s;';
-        btn.innerHTML = '<i class="fas fa-book-reader"></i> <span data-i18n="my_subs">كورساتي وكتبي</span>';
+    // Removed from homepage and navbar; accessible exclusively inside student profile (dashboard.html)
+    const existing = document.getElementById('my-subs-btn');
+    if (existing) existing.remove();
+};
 
-        let cart = document.querySelector('.cart-icon');
-        if (cart) navActions.insertBefore(btn, cart);
-    }
+window.removeSavedContent = async function (title) {
+    if (!confirm('هل تريد بالتأكيد إزالة "' + title + '" من قائمتك؟')) return;
+    let user = JSON.parse(localStorage.getItem('spedia_currentUser'));
+    if (!user) return;
+
+    let subs = JSON.parse(localStorage.getItem('spedia_sub_codes') || '[]');
+    subs = subs.filter(s => !(s.code === user.code && s.title === title));
+    localStorage.setItem('spedia_sub_codes', JSON.stringify(subs));
+
+    let mySavedKey = 'spedia_student_saved_' + user.code;
+    let mySaved = JSON.parse(localStorage.getItem(mySavedKey) || '[]');
+    mySaved = mySaved.filter(s => s.title !== title);
+    localStorage.setItem(mySavedKey, JSON.stringify(mySaved));
+
+    await window.loadStudentData(user);
 };
 
 window.submitExam = async function (title) {
@@ -1235,15 +1267,181 @@ window.loadStudentData = async function (user) {
         }
     }
 
+    // Render My Courses & Books inside the profile
+    const coursesGrid = document.getElementById('dash-student-courses-grid');
+    const booksGrid = document.getElementById('dash-student-books-grid');
+    const gamesGrid = document.getElementById('dash-student-games-grid');
+
+    if (coursesGrid || booksGrid || gamesGrid) {
+        let allContent = JSON.parse(localStorage.getItem('spedia_content') || '[]');
+        if (window.fsData && window.fsData.getAllContent) {
+            try {
+                let fsContent = await window.fsData.getAllContent();
+                let combined = [...allContent, ...fsContent];
+                let uMap = new Map();
+                combined.forEach(c => uMap.set(c.fsId || c.id || c.title, c));
+                allContent = Array.from(uMap.values());
+            } catch (e) { console.warn(e); }
+        }
+
+        let studentSubs = [];
+        if (window.fsData && window.fsData.getSubscriptionsByCode) {
+            try {
+                studentSubs = await window.fsData.getSubscriptionsByCode(user.code);
+            } catch (e) { console.warn(e); }
+        }
+        let localSubs = JSON.parse(localStorage.getItem('spedia_sub_codes') || '[]');
+        let studentLocalSubs = localSubs.filter(s => s.code === user.code);
+        let mySavedLocal = JSON.parse(localStorage.getItem('spedia_student_saved_' + user.code) || '[]');
+
+        let savedTitles = new Set([
+            ...studentSubs.map(s => s.title),
+            ...studentLocalSubs.map(s => s.title),
+            ...mySavedLocal.map(s => s.title)
+        ]);
+
+        let myItems = allContent.filter(c => savedTitles.has(c.title));
+        mySavedLocal.forEach(item => {
+            if (!myItems.some(c => c.title === item.title)) {
+                myItems.push(item);
+            }
+        });
+        studentSubs.forEach(item => {
+            if (item.title && !myItems.some(c => c.title === item.title)) {
+                myItems.push(item);
+            }
+        });
+
+        let myCourses = myItems.filter(c => c.type === 'course');
+        let myBooks = myItems.filter(c => c.type === 'book');
+        let myGames = myItems.filter(c => c.type === 'game');
+
+        let cCount = document.getElementById('dash-courses-count');
+        if (cCount) cCount.innerText = `${myCourses.length} كورس`;
+        let bCount = document.getElementById('dash-books-count');
+        if (bCount) bCount.innerText = `${myBooks.length} كتاب`;
+        let gCount = document.getElementById('dash-games-count');
+        if (gCount) gCount.innerText = `${myGames.length} لعبة`;
+
+        if (coursesGrid) {
+            if (myCourses.length) {
+                coursesGrid.innerHTML = myCourses.map(item => {
+                    let ytLink = item.videoUrl ? item.videoUrl : (item.youtubeId ? `https://www.youtube.com/watch?v=${item.youtubeId}` : '#');
+                    return `
+                        <div class="subject-card animate-on-scroll" style="background:#fff; border-radius:20px; overflow:hidden; box-shadow:0 8px 25px rgba(0,0,0,0.06); border:1px solid #eef1f5;">
+                            <div class="subject-cover" style="height:170px; position:relative; overflow:hidden; background:linear-gradient(135deg, #1e3c72, #2a5298);">
+                                <img src="${item.image || 'https://cdni.iconscout.com/illustration/premium/thumb/online-learning-3462295-2895977.png'}" style="width:100%; height:100%; object-fit:cover;">
+                                <div style="position:absolute; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.35); display:flex; justify-content:center; align-items:center;">
+                                    <i class="fab fa-youtube" style="color:red; font-size:54px; filter:drop-shadow(0 4px 8px rgba(0,0,0,0.4));"></i>
+                                </div>
+                            </div>
+                            <div class="subject-body" style="padding:20px; text-align:center;">
+                                <h4 style="font-size:18px; font-weight:800; color:#121e33; margin-bottom:15px;">${item.title}</h4>
+                                <div style="display:flex; flex-direction:column; gap:8px;">
+                                    <a href="${ytLink}" target="_blank" class="btn-primary" style="padding:12px; border-radius:12px; font-size:16px; font-weight:800; background:linear-gradient(135deg, #4caf50, #2e7d32); text-decoration:none; display:flex; align-items:center; justify-content:center; gap:8px;">
+                                        <i class="fas fa-play-circle" style="font-size:20px;"></i> مشاهدة الفيديو الآن
+                                    </a>
+                                    <button onclick="window.removeSavedContent('${(item.title || '').replace(/'/g, "\\'")}')" class="btn-icon" style="background:#fff0f0; color:#f44336; border:1px solid #ffd1d1; padding:7px; border-radius:10px; font-size:13px; font-weight:bold; cursor:pointer;" title="إزالة من محفوظاتي">
+                                        <i class="fas fa-trash-alt"></i> إزالة من محفوظاتي
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                coursesGrid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align:center; padding:35px 20px; background:#fff; border-radius:16px; border:2px dashed #e0e7ec;">
+                        <i class="fab fa-youtube" style="font-size:48px; color:#ccc; margin-bottom:12px;"></i>
+                        <p style="color:#777; font-weight:700; margin-bottom:15px; font-size:16px;">لم تقم بحفظ أي كورسات تفاعلية بعد.</p>
+                        <a href="explore.html" class="btn-primary" style="display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:12px; font-size:14px; text-decoration:none; font-weight:800;">
+                            <i class="fas fa-search"></i> تصفح الكورسات وحفظها
+                        </a>
+                    </div>
+                `;
+            }
+        }
+
+        if (booksGrid) {
+            if (myBooks.length) {
+                booksGrid.innerHTML = myBooks.map(item => {
+                    let pdfLink = item.pdfUrl || '#';
+                    return `
+                        <div class="subject-card animate-on-scroll" style="background:#fff; border-radius:20px; overflow:hidden; box-shadow:0 8px 25px rgba(0,0,0,0.06); border:1px solid #eef1f5;">
+                            <div class="subject-cover" style="height:170px; position:relative; overflow:hidden; background:linear-gradient(135deg, #e8fbff, #f4f7fa); display:flex; justify-content:center; align-items:center;">
+                                <img src="${item.image || 'https://cdni.iconscout.com/illustration/premium/thumb/book-4113220-3406254.png'}" style="height:85%; object-fit:contain; filter:drop-shadow(0 10px 10px rgba(0,0,0,0.1));">
+                            </div>
+                            <div class="subject-body" style="padding:20px; text-align:center;">
+                                <h4 style="font-size:18px; font-weight:800; color:#121e33; margin-bottom:15px;">${item.title}</h4>
+                                <div style="display:flex; flex-direction:column; gap:8px;">
+                                    <a href="${pdfLink}" target="_blank" class="btn-primary" style="padding:12px; border-radius:12px; font-size:16px; font-weight:800; background:linear-gradient(135deg, #1e3c72, #2a5298); text-decoration:none; display:flex; align-items:center; justify-content:center; gap:8px;">
+                                        <i class="fas fa-book-open" style="font-size:20px;"></i> تصفح / تحميل الكتاب
+                                    </a>
+                                    <button onclick="window.removeSavedContent('${(item.title || '').replace(/'/g, "\\'")}')" class="btn-icon" style="background:#fff0f0; color:#f44336; border:1px solid #ffd1d1; padding:7px; border-radius:10px; font-size:13px; font-weight:bold; cursor:pointer;" title="إزالة من محفوظاتي">
+                                        <i class="fas fa-trash-alt"></i> إزالة من محفوظاتي
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            } else {
+                booksGrid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align:center; padding:35px 20px; background:#fff; border-radius:16px; border:2px dashed #e0e7ec;">
+                        <i class="fas fa-book-open" style="font-size:48px; color:#ccc; margin-bottom:12px;"></i>
+                        <p style="color:#777; font-weight:700; margin-bottom:15px; font-size:16px;">لم تقم بحفظ أي مذكرات أو كتب بعد.</p>
+                        <a href="explore.html" class="btn-primary" style="display:inline-flex; align-items:center; gap:8px; padding:10px 20px; border-radius:12px; font-size:14px; text-decoration:none; font-weight:800;">
+                            <i class="fas fa-search"></i> تصفح الكتب وحفظها
+                        </a>
+                    </div>
+                `;
+            }
+        }
+
+        if (gamesGrid) {
+            let wrapper = document.getElementById('dash-games-wrapper');
+            if (myGames.length) {
+                if (wrapper) wrapper.style.display = 'block';
+                gamesGrid.innerHTML = myGames.map(item => `
+                    <div class="subject-card animate-on-scroll" style="background:#fff; border-radius:20px; overflow:hidden; box-shadow:0 8px 25px rgba(0,0,0,0.06); border:1px solid #eef1f5;">
+                        <div class="subject-cover" style="height:170px; position:relative; overflow:hidden; background:linear-gradient(135deg, #f3e5f5, #e1bee7); display:flex; justify-content:center; align-items:center;">
+                            <i class="fas fa-gamepad" style="font-size:60px; color:#9c27b0;"></i>
+                        </div>
+                        <div class="subject-body" style="padding:20px; text-align:center;">
+                            <h4 style="font-size:18px; font-weight:800; color:#121e33; margin-bottom:15px;">${item.title}</h4>
+                            <div style="display:flex; flex-direction:column; gap:8px;">
+                                <a href="${item.htmlUrl || '#'}" target="_blank" class="btn-primary" style="padding:12px; border-radius:12px; font-size:16px; font-weight:800; background:linear-gradient(135deg, #9c27b0, #6a1b9a); text-decoration:none; display:flex; align-items:center; justify-content:center; gap:8px;">
+                                    <i class="fas fa-gamepad" style="font-size:20px;"></i> تشغيل اللعبة
+                                </a>
+                                <button onclick="window.removeSavedContent('${(item.title || '').replace(/'/g, "\\'")}')" class="btn-icon" style="background:#fff0f0; color:#f44336; border:1px solid #ffd1d1; padding:7px; border-radius:10px; font-size:13px; font-weight:bold; cursor:pointer;" title="إزالة من محفوظاتي">
+                                    <i class="fas fa-trash-alt"></i> إزالة من محفوظاتي
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                if (wrapper) wrapper.style.display = 'none';
+            }
+        }
+    }
+
     if (window.loadNotifications) window.loadNotifications('student');
 }
 
 window.showDashTab = function (tabId, el) {
     document.querySelectorAll('.dash-tab-section').forEach(t => t.style.display = 'none');
-    document.getElementById(tabId).style.display = 'block';
+    let target = document.getElementById(tabId);
+    if (target) target.style.display = 'block';
+
+    document.querySelectorAll('.sidebar-menu li').forEach(li => li.classList.remove('active'));
     if (el) {
-        document.querySelectorAll('.sidebar-menu li').forEach(li => li.classList.remove('active'));
-        el.parentElement.classList.add('active');
+        if (el.parentElement) el.parentElement.classList.add('active');
+    } else {
+        let matchingLink = document.querySelector(`.sidebar-menu a[onclick*="${tabId}"]`);
+        if (matchingLink && matchingLink.parentElement) {
+            matchingLink.parentElement.classList.add('active');
+        }
     }
 
     if (window.location.hash !== '#' + tabId) {
@@ -1373,22 +1571,14 @@ window.updateProfileImg = async function (input) {
     }
 }
 
-window.unlockCourse = function (title, code) {
-    if (!code || code.trim() === '' || code === 'undefined') {
-        alert('هذا المحتوى قيد التجهيز أو الكود السري مفقود.');
-        return;
+window.unlockCourse = function (title) {
+    let unlocked = JSON.parse(localStorage.getItem('spedia_unlocked') || '[]');
+    if (title && !unlocked.includes(title)) {
+        unlocked.push(title);
+        localStorage.setItem('spedia_unlocked', JSON.stringify(unlocked));
     }
-    let input = prompt('هذا المحتوى محمي بقفل 🔒.\\nالرجاء إدخال الكود السري لفتحه:');
-    if (input === code) {
-        alert('تم فتح "' + title + '" بنجاح! 🎉\\n(تمت المطابقة، يمكنك الآن مشاهدة المحتوى)');
-        let cart = JSON.parse(localStorage.getItem('spedia_unlocked') || '[]');
-        cart.push(title);
-        localStorage.setItem('spedia_unlocked', JSON.stringify(cart));
-        window.location.reload();
-    } else if (input !== null) {
-        alert('الكود الذي أدخلته غير صحيح. يرجى التأكد أو التواصل مع الإدارة.');
-    }
-}
+    alert('المحتوى مجاني بالكامل ومتاح لك مباشرة دون أي كود! 🎉');
+};
 
 
 document.addEventListener("DOMContentLoaded", async () => {
